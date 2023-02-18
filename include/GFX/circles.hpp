@@ -2,7 +2,6 @@
 #define _GFX_CIRCLES_HPP_
 
 #include "quads.hpp"
-#include "opengl/shaders.hpp"
 
 namespace gfx {
 

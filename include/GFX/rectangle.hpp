@@ -2,7 +2,6 @@
 #define _GFX_RECTANGLE_HPP_
 
 #include "quads.hpp"
-#include "opengl/shaders.hpp"
 
 namespace gfx {
 
