@@ -69,27 +69,30 @@ namespace gfx {
 	class context {
 	public:
 		context(char const * name)
-		: window_{creator(), name} { init(); }
+		: window{creator(), name} { init(); }
 
 		context(char const * name, int width, int height)
-		: window_{creator(), name, width, height} { init(); }
+		: window{creator(), name, width, height} { init(); }
 
 		void clear_to(float r, float g, float b, float a = 1) noexcept {
 			gl::set_background_color(r, g, b, a);
 		}
 
-		void focus() { window_.make_current(); }
-		auto time() const noexcept { return window_.owner().time(); }
+		void focus() { window.make_current(); }
+		auto time() const noexcept { return window.owner().time(); }
 		[[nodiscard]] bool update(auto f) {
 			static gl::clearer clear{true, true};
-			auto [w, h] = window_.size();
+			auto [w, h] = window.size();
 			gl::set_viewport(0, 0, w, h);
 			clear();
 			f(w, h);
-			window_.swap_buffers();
-			window_.owner().poll();
-			return !window_.should_close();
+			window.swap_buffers();
+			window.owner().poll();
+			return !window.should_close();
 		}
+
+	public:
+		gl::window window;
 
 #ifdef _DEBUG
 		void wireframe() const noexcept { gl::set_polygon_mode(gl::polygon_mode::line); }
@@ -107,7 +110,7 @@ namespace gfx {
 		}
 
 		void init() {
-			window_.make_current();
+			window.make_current();
 			gl::disable_vsync();
 			gl::load();
 			gl::depth_testing(true);
@@ -117,8 +120,7 @@ namespace gfx {
 		}
 
 	private:
-		static inline constinit std::weak_ptr<gl::creator const> creator_{};
-		gl::window window_;
+		static inline constinit std::weak_ptr<gl::creator const> creator_;
 	};
 
 }
