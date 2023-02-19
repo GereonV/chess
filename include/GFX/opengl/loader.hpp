@@ -47,6 +47,10 @@ inline void gfx::gl::load() {
 
 #include <GLFW/glfw3.h>
 
+#ifdef IMGUI
+namespace gfx::imgui { class context; }
+#endif // IMGUI
+
 namespace gfx::gl {
 
 	enum class hint : int {
@@ -81,10 +85,13 @@ namespace gfx::gl {
 		void set_hint(hint hint, bool enable = true) noexcept { glfwWindowHint(static_cast<int>(hint), enable); }
 		[[nodiscard]] double time() const noexcept { return glfwGetTime(); }
 	private:
-		static inline creator * ptr_;
+		static inline constinit creator * ptr_;
 	};
 
 	class window {
+#ifdef IMGUI
+	friend gfx::imgui::context;
+#endif // IMGUI
 	public:
 		window(std::shared_ptr<creator const> creator, char const * title)
 		: ctx_{std::move(creator)} {
@@ -122,6 +129,48 @@ namespace gfx::gl {
 	inline void disable_vsync() { glfwSwapInterval(0); }
 
 }
+
+#ifdef IMGUI
+
+#include <ImGui/imgui.h>
+#include <ImGui/imgui_impl_opengl3.h>
+#include <ImGui/imgui_impl_glfw.h>
+
+namespace gfx::imgui {
+
+	class context {
+	public:
+		context(gfx::gl::window & win) {
+			IMGUI_CHECKVERSION();
+			ImGui::CreateContext();
+			ImGui_ImplGlfw_InitForOpenGL(win.win_, true);
+			ImGui_ImplOpenGL3_Init();
+		}
+
+		~context() {
+			ImGui_ImplOpenGL3_Shutdown();
+			ImGui_ImplGlfw_Shutdown();
+			ImGui::DestroyContext();
+		}
+	};
+
+	class frame {
+	public:
+		frame() {
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
+
+		~frame() {
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
+	};
+
+}
+
+#endif // IMGUI
 
 #endif // GLFW
 
