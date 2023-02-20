@@ -44,3 +44,7 @@ int main() {
 		gfx::draw_quad();
 	}));
 }
+
+#ifdef _WIN32
+int WinMain() { main(); }
+#endif // _WIN32
