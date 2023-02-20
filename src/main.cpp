@@ -1,4 +1,33 @@
+#include <cstdlib> // std::getenv()
+#include <filesystem>
+#ifdef _DEBUG
+#include <iostream>
+#endif // _DEBUG
 #include "rendering.hpp"
+
+inline std::filesystem::path get_app_dir() noexcept try {
+	namespace fs = std::filesystem;
+#ifdef _WIN32
+	fs::path dir{std::getenv("APPDATA")}; // C:\Users\<username>\AppData\Roaming
+	fs::create_directory(dir /= "Chess");
+	return dir;
+#else
+	auto xdg = std::getenv("XDG_CONFIG_HOME"); // defaults to $HOME/.config
+	auto home = std::getenv("HOME");  // normally /home/<username>
+	auto dir = fs::path{home} /= ".config/chess";
+	if(fs::exists(dir))
+		return dir;
+	if(xdg)
+		dir.assign(xdg) /= "chess";
+	fs::create_directories(dir);
+	return dir;
+#endif
+} catch([[maybe_unused]] std::filesystem::filesystem_error const & e) {
+#ifdef _DEBUG
+	std::cerr << e.what() << '\n';
+#endif // _DEBUG
+	return {};
+}
 
 inline constinit board_view view{
 	{.6f, .6f, .7f},
