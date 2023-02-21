@@ -1,35 +1,24 @@
-#ifndef GFX_RECTANGLE_HPP
-#define GFX_RECTANGLE_HPP
+#ifndef CHESS_RENDERING_HPP
+#define CHESS_RENDERING_HPP
 
 #include <GFX/quads.hpp>
 #include "shadersrc.hpp"
+#include "color.hpp"
 
-struct color {
-private:
-	using data = float[3];
-	using       ref = data       &;
-	using const_ref = data const &;
-public:
-	color() = default;
-	constexpr color(float r, float g, float b) : _rgb{r, g, b} {}
-	constexpr void r(float r) noexcept { _rgb[0] = r; }
-	constexpr void g(float g) noexcept { _rgb[1] = g; }
-	constexpr void b(float b) noexcept { _rgb[2] = b; }
-	constexpr void set(float r, float g, float b) noexcept {
-		_rgb[0] = r;
-		_rgb[1] = g;
-		_rgb[2] = b;
+struct render_settings {
+	float scale_x, scale_y;
+	float size{1.5f}; // size=1 -> half screen, size=2 -> fillscreen
+
+	void scale_for(int width, int height) noexcept {
+		if(width > height) {
+			scale_x = static_cast<float>(height) / static_cast<float>(width);
+			scale_y = 1;
+		} else {
+			scale_x = 1;
+			scale_y = static_cast<float>(width) / static_cast<float>(height);
+		}
 	}
 
-	constexpr float r() const noexcept { return _rgb[0]; }
-	constexpr float g() const noexcept { return _rgb[1]; }
-	constexpr float b() const noexcept { return _rgb[2]; }
-	constexpr       ref rgb()       noexcept { return _rgb; }
-	constexpr const_ref rgb() const noexcept { return _rgb; }
-	constexpr operator       ref()       noexcept { return _rgb; }
-	constexpr operator const_ref() const noexcept { return _rgb; }
-private:
-	data _rgb;
 };
 
 struct board_view {
@@ -41,20 +30,45 @@ struct board_view {
 class board_renderer : public gfx::quad_renderer<board_renderer> {
 friend quad_renderer;
 public:
-	board_renderer(gfx::gl::shader const & vert) noexcept
-	: quad_renderer{vert, BOARD_FRAG} {}
+	board_renderer(gfx::gl::shader const & vert, board_view const & view) noexcept
+	: quad_renderer{vert, BOARD_FRAG} {
+		use();
+		set_light_color(view.light_color);
+		set_dark_color(view.dark_color);
+		if(view.flipped)
+			set_flipped(true);
+	}
 
-	void set_white_color(color c) const noexcept {
+	void set_light_color(color c) const noexcept {
 		gfx::gl::set_uniform_3_floats_arr(1, 1, c);
 	}
 
-	void set_black_color(color c) const noexcept {
+	void set_dark_color(color c) const noexcept {
 		gfx::gl::set_uniform_3_floats_arr(2, 1, c);
 	}
 
 	void set_flipped(bool flipped) const noexcept {
 		gfx::gl::set_uniform_int(3, flipped);
 	}
+
 };
 
-#endif // GFX_RECTANGLE_HPP
+inline void render(render_settings const & settings, board_renderer const & board) noexcept {
+	gfx::matrix transform{};
+	transform[0][0] = settings.size * settings.scale_x;
+	transform[1][1] = settings.size * settings.scale_y;
+	transform[2][2] = 1.f;
+	transform[3][3] = 1.f;
+	board.use();
+	gfx::set_transformation(transform);
+	gfx::draw_quad();
+	return; // TODO remove for individual squares
+	transform[0][0] /= 8.f;
+	transform[1][1] /= 8.f;
+	gfx::set_transformation(transform);
+
+	// transform[3][0] = <translate_x>;
+	// transform[3][1] = <translate_y>;
+}
+
+#endif // CHESS_RENDERING_HPP
