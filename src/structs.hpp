@@ -1,6 +1,8 @@
 #ifndef CHESS_STRUCTS_HPP
 #define CHESS_STRUCTS_HPP
 
+#include "color.hpp"
+
 // config and session
 struct board_config {
 	color light_color{.6f, .6f, .7f};  // #9999B3
