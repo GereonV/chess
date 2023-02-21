@@ -68,6 +68,8 @@ namespace gfx::gl {
 				throw error{"GLFW instance already exists"};
 			ptr_ = this;
 			glfwSetErrorCallback([](int code, char const * description) {
+				if(code == GLFW_FORMAT_UNAVAILABLE) // may consume unsupported pixel format
+					return;
 				throw error{"GLFW-Error (" + std::to_string(code) + "): " + description};
 			});
 			glfwInit();
