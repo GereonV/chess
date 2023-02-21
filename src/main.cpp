@@ -25,20 +25,20 @@ inline void update_settings(board_settings & bs, board_renderer const & board) n
 
 int main() {
 	auto config = read_config();
-	board_settings b_settings{config.board}; // default flipped
+	board_settings b_settings{config.board}; // not flipped by default
 	gfx::context ctx{"Schach", 1280, 720};
-	ctx.clear_to(.12f, .12f, .12f);
+	ctx.clear_to(.12f, .12f, .12f); // background #1E1E1F
 	gfx::imgui::context imctx{ctx.window};
-	ImGui::GetIO().IniFilename = nullptr;
+	ImGui::GetIO().IniFilename = nullptr; // disable imgui.ini
 	auto vert = gfx::quad_vertex_shader();
 	board_renderer board{vert, b_settings};
 	vert.~shader();
 	render_settings r_settings; // default size
 	while(ctx.update([&](auto width, auto height) {
-		r_settings.scale_for(width, height);
 		gfx::imgui::frame _{};
 		board.use();
 		update_settings(b_settings, board);
+		r_settings.scale_for(width, height);
 		render(r_settings);
 	}));
 }
