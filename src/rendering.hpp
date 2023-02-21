@@ -4,6 +4,7 @@
 #include <GFX/quads.hpp>
 #include "shadersrc.hpp"
 #include "color.hpp"
+#include "structs.hpp"
 
 struct render_settings {
 	float scale_x, scale_y;
@@ -21,21 +22,15 @@ struct render_settings {
 
 };
 
-struct board_view {
-	color light_color;
-	color dark_color;
-	bool flipped{false};
-};
-
 class board_renderer : public gfx::quad_renderer<board_renderer> {
 friend quad_renderer;
 public:
-	board_renderer(gfx::gl::shader const & vert, board_view const & view) noexcept
+	board_renderer(gfx::gl::shader const & vert, board_settings const & bs) noexcept
 	: quad_renderer{vert, BOARD_FRAG} {
 		use();
-		set_light_color(view.light_color);
-		set_dark_color(view.dark_color);
-		if(view.flipped)
+		set_light_color(bs.light_color);
+		set_dark_color(bs.dark_color);
+		if(bs.flipped)
 			set_flipped(true);
 	}
 
@@ -53,13 +48,13 @@ public:
 
 };
 
-inline void render(render_settings const & settings, board_renderer const & board) noexcept {
+// after board.use()
+inline void render(render_settings const & settings) noexcept {
 	gfx::matrix transform{};
 	transform[0][0] = settings.size * settings.scale_x;
 	transform[1][1] = settings.size * settings.scale_y;
 	transform[2][2] = 1.f;
 	transform[3][3] = 1.f;
-	board.use();
 	gfx::set_transformation(transform);
 	gfx::draw_quad();
 	return; // TODO remove for individual squares
