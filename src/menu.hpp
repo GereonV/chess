@@ -14,6 +14,10 @@ enum class settings_change {
 
 [[nodiscard]] inline settings_change menu(board_settings & s) {
 	auto change = settings_change::none;
+	auto flip = [&] {
+		s.flipped = !s.flipped;
+		change = settings_change::flip;
+	};
 	if(ImGui::BeginMainMenuBar()) {
 		if(ImGui::BeginMenu("View")) {
 			ImGui::Text("Light Color:"); ImGui::SameLine();
@@ -22,14 +26,14 @@ enum class settings_change {
 			ImGui::Text("Dark Color: "); ImGui::SameLine();
 			if(ImGui::ColorEdit3("Dark Color:", s.dark_color, color_edit_flags))
 				change = settings_change::dark_color;
-			if(ImGui::Button("Flip")) {
-				s.flipped = !s.flipped;
-				change = settings_change::flip;
-			}
+			if(ImGui::Button("Flip"))
+				flip();
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
 	}
+	if(change == settings_change::none && ImGui::IsKeyPressed(ImGuiKey_F, false))
+		flip();
 	return change;
 }
 
