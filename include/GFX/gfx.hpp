@@ -113,7 +113,7 @@ namespace gfx {
 			window.make_current();
 			gl::disable_vsync();
 			gl::load();
-			gl::depth_testing(true);
+			// gl::depth_testing(true);
 			gl::blending(true);
 			gl::set_blending(gl::blending_factor::src_alpha, // use alpha
 				gl::blending_factor::inv_src_alpha); // fade other fragments

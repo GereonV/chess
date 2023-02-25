@@ -50,7 +50,7 @@ public:
 
 // after board.use()
 inline void render(render_settings const & settings) noexcept {
-	gfx::matrix transform{};
+	static constinit gfx::matrix transform{};
 	transform[0][0] = settings.size * settings.scale_x;
 	transform[1][1] = settings.size * settings.scale_y;
 	transform[2][2] = 1.f;
@@ -58,12 +58,14 @@ inline void render(render_settings const & settings) noexcept {
 	gfx::set_transformation(transform);
 	gfx::draw_quad();
 	return; // TODO remove for individual squares
-	transform[0][0] /= 8.f;
-	transform[1][1] /= 8.f;
+	// TODO use correct shader-program
 	gfx::set_transformation(transform);
-
-	// transform[3][0] = <translate_x>;
-	// transform[3][1] = <translate_y>;
+	unsigned char num_pieces;
+	unsigned float vertices[64 * 4 * 4]; // 64 squares * 4 vertices/square * 4 floats/vertex
+	// TODO fill (keep element order in mind)
+	unsigned char elements[64 * 6]; // 64 squares * 6 elements/square - STATIC and only first n used TODO make static and initialize with shader
+	gl::draw(gl::primitive::triangles, 6 * num_pieces, gl::index_type::unsigned_byte, 0); // 6 elements/piece
+	// TODO render active piece LAST!
 }
 
 #endif // CHESS_RENDERING_HPP

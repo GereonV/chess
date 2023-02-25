@@ -29,13 +29,16 @@ int main() {
 	gfx::context ctx{"Schach", 1280, 720};
 	ctx.clear_to(.12f, .12f, .12f); // background #1E1E1F
 	gfx::imgui::context imctx{ctx.window};
-	ImGui::GetIO().IniFilename = nullptr; // disable imgui.ini
+	auto && io = ImGui::GetIO();
+	io.IniFilename = nullptr; // disable imgui.ini
 	auto vert = gfx::quad_vertex_shader();
 	board_renderer board{vert, b_settings};
 	vert.~shader();
 	render_settings r_settings; // default size
 	while(ctx.update([&](auto width, auto height) {
 		gfx::imgui::frame _{};
+		if(!io.WantCaptureMouse)
+			; // TODO mouse
 		board.use();
 		update_settings(b_settings, board);
 		r_settings.scale_for(width, height);
