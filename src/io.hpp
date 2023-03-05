@@ -16,6 +16,44 @@
 #include <GAT/combinators.hpp>
 #include "structs.hpp"
 
+// COLOR
+
+inline std::ostream & operator<<(std::ostream & out, color const & color) noexcept {
+	auto fmt = [&](float f) {
+		out << std::setw(2) << static_cast<int>(255.f * f + .5f);
+	};
+	auto flags = out.flags();
+	auto fill = out.fill();
+	out << "0x" << std::hex << std::setfill('0');
+	fmt(color.r());
+	fmt(color.g());
+	fmt(color.b());
+	out.flags(flags);
+	out.fill(fill);
+	return out;
+}
+
+inline std::istream & operator>>(std::istream & in, color & color) {
+	char buf[8];
+	auto h2d = [](char c) { return c >= 'a' ? c - 'a' + 10 : c >= 'A' ? c - 'A' + 10 : c - '0'; };
+	auto fmt = [&](int i) {
+		auto c1 = h2d(buf[2 + 2 * i]);
+		auto c2 = h2d(buf[3 + 2 * i]);
+		color[i] = static_cast<float>(16 * c1 + c2) / 255.f;
+	};
+	using namespace gat::chars;
+	using namespace gat::combinators;
+	in.read(buf, 8); // potentially throwing (in.exceptions())
+	if(!in || !sequence<exact<'0'>, left<set<'x', 'X'>, exactly<6, xdigit>>>(buf))
+		throw std::invalid_argument{"Couldn't parse Color"};
+	fmt(0);
+	fmt(1);
+	fmt(2);
+	return in;
+}
+
+// CONFIG
+
 struct config {
 	board_config board;
 };
@@ -77,42 +115,6 @@ inline config read_config() noexcept {
 	if(std::filesystem::exists(path))
 		read_config_impl(std::ifstream{path}, config);
 	return config;
-}
-
-// COLOR
-
-inline std::ostream & operator<<(std::ostream & out, color const & color) noexcept {
-	auto fmt = [&](float f) {
-		out << std::setw(2) << static_cast<int>(255.f * f + .5f);
-	};
-	auto flags = out.flags();
-	auto fill = out.fill();
-	out << "0x" << std::hex << std::setfill('0');
-	fmt(color.r());
-	fmt(color.g());
-	fmt(color.b());
-	out.flags(flags);
-	out.fill(fill);
-	return out;
-}
-
-inline std::istream & operator>>(std::istream & in, color & color) {
-	char buf[8];
-	auto h2d = [](char c) { return c >= 'a' ? c - 'a' + 10 : c >= 'A' ? c - 'A' + 10 : c - '0'; };
-	auto fmt = [&](int i) {
-		auto c1 = h2d(buf[2 + 2 * i]);
-		auto c2 = h2d(buf[3 + 2 * i]);
-		color[i] = static_cast<float>(16 * c1 + c2) / 255.f;
-	};
-	using namespace gat::chars;
-	using namespace gat::combinators;
-	in.read(buf, 8); // potentially throwing (in.exceptions())
-	if(!in || !sequence<exact<'0'>, left<set<'x', 'X'>, exactly<6, xdigit>>>(buf))
-		throw std::invalid_argument{"Couldn't parse Color"};
-	fmt(0);
-	fmt(1);
-	fmt(2);
-	return in;
 }
 
 #endif // CHESS_IO_HPP
