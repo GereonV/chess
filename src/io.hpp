@@ -117,4 +117,9 @@ inline config read_config() noexcept {
 	return config;
 }
 
+#ifndef _WIN32
+extern unsigned char image_data_start asm("_binary_pieces_all_png_start");
+extern unsigned char image_data_end   asm("_binary_pieces_all_png_end");
+#endif // _WIN32
+
 #endif // CHESS_IO_HPP

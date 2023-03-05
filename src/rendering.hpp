@@ -5,6 +5,29 @@
 #include "shadersrc.hpp"
 #include "structs.hpp"
 
+struct spritesheet {
+public:
+	explicit spritesheet(std::span<unsigned char const> s) {
+		stbi_set_flip_vertically_on_load(true);
+		data = stbi_load_from_memory(s.data(), static_cast<int>(s.size_bytes()), &width, &height, &channel_count, 0);
+		if(!data)
+			throw gfx::gl::error{stbi_failure_reason()};
+	}
+
+	~spritesheet() { stbi_image_free(data); }
+	constexpr gfx::gl::image_format format() const {
+		switch(channel_count) {
+		case 3:	 return gfx::gl::image_format::rgb;
+		case 4:	 return gfx::gl::image_format::rgba;
+		}
+		throw gfx::gl::error{"Unsupported bytes per pixel"};
+	}
+
+public:
+	int width, height, channel_count;
+	unsigned char * data;
+};
+
 struct render_settings {
 	int width, height;
 	float size{1.5f}; // size=1 -> half screen, size=2 -> fullscreen

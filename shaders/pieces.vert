@@ -19,6 +19,8 @@ vec2 relativePos() {
 }
 
 vec2 texCoords() {
+	return corner * vec2(204.0 / 1854, 190.0 / 618);
+	// TODO fix normalization
 	vec2 colorOffset = uPieceToTex[6][(inVert.y >> 6) & 1];
 	uint piece = findLSB(inVert.y & (1 << 6) - 1);
 	return colorOffset + uPieceToTex[piece][0] + corner * uPieceToTex[piece][1];

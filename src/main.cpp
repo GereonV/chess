@@ -20,8 +20,20 @@ inline void update_settings(board_settings & bs, board_renderer const & board) n
 	};
 	menu(bs, light_color_updated, dark_color_updated, flipped);
 	if(change)
-		write_config(config{bs});
+		write_config({bs});
 }
+
+inline constinit const float tex[7][2][2]{
+	// start       size
+	{{   0, 0}, {204, 190}}, // king
+	{{ 309, 0}, {204, 273}}, // queen
+	{{ 618, 0}, {204, 228}}, // bishop
+	{{ 927, 0}, {237, 304}}, // knight
+	{{1236, 0}, {167, 309}}, // rook
+	{{1545, 0}, {204, 248}}, // pawn
+
+	{{0, 309}, {0, 0}}, // white, black
+};
 
 int main() {
 	auto config = read_config();
@@ -33,16 +45,22 @@ int main() {
 	io.IniFilename = nullptr; // disable imgui.ini
 	auto vert = gfx::quad_vertex_shader();
 	board_renderer board{vert, b_settings};
+	auto pieces = piece_renderer::create();
+	pieces.set_spritesheet_settings(tex);
+	gfx::sprite sheet{spritesheet{{&image_data_start, &image_data_end}}, true, false};
 	vert.~shader();
 	render_settings r_settings; // default size
+	r_settings.active_piece = {piece_color::WHITE, piece_type::KING};
+	// ctx.wireframe();
 	while(ctx.update([&](auto width, auto height) {
 		gfx::imgui::frame _{};
 		if(!io.WantCaptureMouse)
-			; // TODO mouse
+			; // TODO is piece active?
 		board.use();
 		update_settings(b_settings, board);
-		r_settings.scale_for(width, height);
-		render(r_settings);
+		r_settings.width = width;
+		r_settings.height = height;
+		render(r_settings, pieces);
 	}));
 }
 
