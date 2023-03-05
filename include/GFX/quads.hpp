@@ -35,8 +35,8 @@ namespace gfx {
 			bo_.ebo().buffer_data( indices, gl::data_store_usage::static_draw);
 			gl::vertex_attrib_pointer pos_ptr{0}, coord_ptr{1};
 			vao_.enable_attrib_pointers(pos_ptr, coord_ptr);
-			pos_ptr  .set(2, gl::data_type::_float, false, 4 * sizeof(float), 0);
-			coord_ptr.set(2, gl::data_type::_float, false, 4 * sizeof(float), centered_coords ? 0 : 2 * sizeof(float));
+			pos_ptr  .set_float(2, gl::data_type::_float, false, 4 * sizeof(float), 0);
+			coord_ptr.set_float(2, gl::data_type::_float, false, 4 * sizeof(float), centered_coords ? 0 : 2 * sizeof(float));
 			gl::shader frag{gl::shader_type::fragment, source_frag};
 			frag.compile();
 			program_.attach(vert, frag);
@@ -51,9 +51,9 @@ namespace gfx {
 			static_cast<T const *>(this)->prepare();
 		}
 
-	private:
+	protected:
 		gl::vertex_array_object vao_;
-		gl::buffer_object bo_; // kept around for deletion
+		gl::buffer_object bo_;
 		gl::shader_program program_;
 	};
 

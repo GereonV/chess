@@ -109,8 +109,11 @@ namespace gfx::gl {
 		constexpr vertex_attrib_pointer(GLuint index) noexcept : index_{index} {}
 		void enable() const noexcept { glEnableVertexAttribArray(index_); }
 		void disable() const noexcept { glDisableVertexAttribArray(index_); }
-		void set(GLint size, data_type type, GLboolean normalized, GLsizei stride, auto offset) noexcept {
+		void set_float(GLint size, data_type type, GLboolean normalized, GLsizei stride, auto offset) noexcept {
 			glVertexAttribPointer(index_, size, static_cast<GLenum>(type), normalized, stride, reinterpret_cast<void *>(offset));
+		}
+		void set_int(GLint size, data_type type, GLsizei stride, auto offset) noexcept {
+			glVertexAttribIPointer(index_, size, static_cast<GLenum>(type), stride, reinterpret_cast<void *>(offset));
 		}
 
 	private:
