@@ -1,6 +1,7 @@
 obj/
 bin/
 lib/
+src/shadersrc.hpp
 Makefile
 Session.vim
 .vscode/
