@@ -8,6 +8,7 @@
 #define ERR(e)
 #endif
 
+#include <cstdlib> // std::getenv()
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
