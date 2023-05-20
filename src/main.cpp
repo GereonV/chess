@@ -1,4 +1,3 @@
-#include <cstdlib> // std::getenv()
 #include "io.hpp"
 #include "menu.hpp"
 #include "rendering.hpp"
@@ -15,7 +14,7 @@ inline void update_settings(board_settings & bs, board_renderer const & board) n
 		board.set_dark_color(bs.dark_color);
 	};
 	auto flipped = [&] {
-		change = true;
+		// change = true;
 		board.set_flipped(bs.flipped);
 	};
 	menu(bs, light_color_updated, dark_color_updated, flipped);
@@ -46,6 +45,7 @@ int main() {
 	auto vert = gfx::quad_vertex_shader();
 	board_renderer board{vert, b_settings};
 	auto pieces = piece_renderer::create();
+	pieces.use();
 	pieces.set_spritesheet_settings(tex);
 	gfx::sprite sheet{spritesheet{{&image_data_start, &image_data_end}}, true, false};
 	vert.~shader();
